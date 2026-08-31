@@ -13,12 +13,13 @@ if (!activity) {
 }
 
 const { Content } = await activity.render();
+const base = import.meta.env.BASE_URL;
 ---
 
 <div class="embedded-resource">
   <div class="embedded-header no-print">
     <span class="resource-label">Activity Resource: <strong>{activity.data.title}</strong></span>
-    <a href={`/activities/${activity.slug}`} class="view-standalone" target="_blank">
+    <a href={`${base}activities/${activity.slug}`} class="view-standalone" target="_blank">
       View Standalone <span>&rarr;</span>
     </a>
   </div>

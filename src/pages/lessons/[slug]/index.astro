@@ -11,6 +11,7 @@ export async function getStaticPaths() {
 }
 
 const { lesson } = Astro.props;
+const base = import.meta.env.BASE_URL;
 
 // Optionally fetch the activity title if there is one linked
 let primaryActivityTitle = "Interactive Activity";
@@ -47,7 +48,7 @@ if (lesson.data.activities && lesson.data.activities.length > 0) {
         )}
         
         <div class="hero-cta">
-          <a href={`/lessons/${lesson.slug}/guide`} class="btn btn-primary btn-large">Start Teaching &rarr;</a>
+          <a href={`${base}lessons/${lesson.slug}/guide`} class="btn btn-primary btn-large">Start Teaching &rarr;</a>
         </div>
       </div>
     </header>
@@ -89,7 +90,7 @@ if (lesson.data.activities && lesson.data.activities.length > 0) {
           <h3>Included Resources</h3>
           <ul class="resource-list">
             <li>
-              <a href={`/lessons/${lesson.slug}/guide`} class="resource-link">
+              <a href={`${base}lessons/${lesson.slug}/guide`} class="resource-link">
                 <div class="icon">📖</div>
                 <div class="details">
                   <strong>Teacher's Guide</strong>
@@ -98,7 +99,7 @@ if (lesson.data.activities && lesson.data.activities.length > 0) {
               </a>
             </li>
             <li>
-              <a href={`/lessons/${lesson.slug}/guide#knowledge-check`} class="resource-link">
+              <a href={`${base}lessons/${lesson.slug}/guide#knowledge-check`} class="resource-link">
                 <div class="icon">🤔</div>
                 <div class="details">
                   <strong>Knowledge Check</strong>
@@ -108,7 +109,7 @@ if (lesson.data.activities && lesson.data.activities.length > 0) {
             </li>
             {lesson.data.activities && lesson.data.activities.length > 0 && (
               <li>
-                <a href={`/lessons/${lesson.slug}/guide#activity-time`} class="resource-link">
+                <a href={`${base}lessons/${lesson.slug}/guide#activity-time`} class="resource-link">
                   <div class="icon">🏃</div>
                   <div class="details">
                     <strong>Activity</strong>
@@ -119,7 +120,7 @@ if (lesson.data.activities && lesson.data.activities.length > 0) {
             )}
             {lesson.data.activities && lesson.data.activities.length > 1 && (
               <li>
-                <a href={`/lessons/${lesson.slug}/guide#craft-time`} class="resource-link">
+                <a href={`${base}lessons/${lesson.slug}/guide#craft-time`} class="resource-link">
                   <div class="icon">✂️</div>
                   <div class="details">
                     <strong>Craft</strong>
@@ -130,7 +131,7 @@ if (lesson.data.activities && lesson.data.activities.length > 0) {
             )}
             {lesson.data.memoryVerse && (
               <li>
-                <a href={`/lessons/${lesson.slug}/guide#memory-verse`} class="resource-link">
+                <a href={`${base}lessons/${lesson.slug}/guide#memory-verse`} class="resource-link">
                   <div class="icon">📝</div>
                   <div class="details">
                     <strong>Memory Verse</strong>
@@ -140,7 +141,7 @@ if (lesson.data.activities && lesson.data.activities.length > 0) {
               </li>
             )}
             <li>
-              <a href={`/lessons/${lesson.slug}/guide#print`} class="resource-link">
+              <a href={`${base}lessons/${lesson.slug}/guide#print`} class="resource-link">
                 <div class="icon">🖨️</div>
                 <div class="details">
                   <strong>Print Version</strong>

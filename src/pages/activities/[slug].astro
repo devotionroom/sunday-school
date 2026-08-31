@@ -11,6 +11,7 @@ export async function getStaticPaths() {
 }
 
 const { activity } = Astro.props;
+const base = import.meta.env.BASE_URL;
 const { Content } = await activity.render();
 ---
 
@@ -18,7 +19,7 @@ const { Content } = await activity.render();
   <div class="container">
     <div class="standalone-header no-print">
       <div class="breadcrumb">
-        <a href="/">&larr; Home</a> / Activities
+        <a href={base}>&larr; Home</a> / Activities
       </div>
       <h1>{activity.data.title}</h1>
       <div class="tags">

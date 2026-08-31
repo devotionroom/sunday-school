@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
 const lessons = await getCollection('lessons');
+const base = import.meta.env.BASE_URL;
 ---
 
 <Layout title="Lessons Library">
@@ -16,7 +17,7 @@ const lessons = await getCollection('lessons');
   <div class="container">
     <div class="lesson-list">
       {lessons.map(lesson => (
-        <a href={`/lessons/${lesson.slug}`} class="lesson-card interactive-card">
+        <a href={`${base}lessons/${lesson.slug}`} class="lesson-card interactive-card">
           <h2>{lesson.data.title}</h2>
           {lesson.data.bibleReference && <div class="ref">{lesson.data.bibleReference}</div>}
           {lesson.data.bigIdea && <p>{lesson.data.bigIdea}</p>}
