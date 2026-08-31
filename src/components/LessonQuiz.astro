@@ -1,0 +1,317 @@
+---
+interface Question {
+  id: string;
+  question: string;
+  correctAnswer: string;
+  incorrectAnswers: string[];
+  explanation: string;
+}
+
+interface Props {
+  title?: string;
+  questions: Question[];
+}
+
+const { title = "Knowledge Check", questions } = Astro.props;
+---
+
+<div class="lesson-quiz no-print" data-questions={JSON.stringify(questions)}>
+  <div class="quiz-header">
+    <h3>{title}</h3>
+    <span class="quiz-progress">Question <span class="current-q">1</span> of {questions.length}</span>
+  </div>
+
+  <div class="quiz-body">
+    <!-- Quiz UI Container -->
+    <div class="quiz-active-area">
+      <h4 class="question-text">Loading...</h4>
+      <div class="answers-grid"></div>
+    </div>
+    
+    <!-- Feedback Area (Borrows visually from Devotion Room, adapted for inline use) -->
+    <div class="feedback-area" style="display: none;">
+      <div class="feedback-header">
+        <span class="feedback-icon"></span>
+        <h4 class="feedback-title"></h4>
+      </div>
+      <div class="feedback-correction" style="display: none;">
+        <span>The correct answer was:</span>
+        <strong class="correct-answer-text"></strong>
+      </div>
+      <p class="feedback-explanation"></p>
+      <button class="btn btn-primary next-btn">Next Question</button>
+    </div>
+
+    <!-- Final Results Area -->
+    <div class="results-area" style="display: none;">
+      <h4>Quiz Complete!</h4>
+      <p>You got <strong class="score-text"></strong> out of {questions.length} correct.</p>
+      <button class="btn btn-secondary restart-btn">Try Again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // @ts-nocheck
+  // Simple, isolated vanilla JS for the lesson-specific quiz
+  // Abstracted from the Devotion Room global trivia engine to be a targeted component.
+  class LessonQuiz {
+    constructor(container) {
+      this.container = container;
+      this.questions = JSON.parse(container.getAttribute('data-questions'));
+      this.currentIndex = 0;
+      this.score = 0;
+      
+      this.ui = {
+        progress: container.querySelector('.current-q'),
+        activeArea: container.querySelector('.quiz-active-area'),
+        questionText: container.querySelector('.question-text'),
+        answersGrid: container.querySelector('.answers-grid'),
+        
+        feedbackArea: container.querySelector('.feedback-area'),
+        feedbackIcon: container.querySelector('.feedback-icon'),
+        feedbackTitle: container.querySelector('.feedback-title'),
+        feedbackCorrection: container.querySelector('.feedback-correction'),
+        correctAnswerText: container.querySelector('.correct-answer-text'),
+        feedbackExplanation: container.querySelector('.feedback-explanation'),
+        nextBtn: container.querySelector('.next-btn'),
+        
+        resultsArea: container.querySelector('.results-area'),
+        scoreText: container.querySelector('.score-text'),
+        restartBtn: container.querySelector('.restart-btn')
+      };
+
+      this.ui.nextBtn.addEventListener('click', () => this.handleNext());
+      this.ui.restartBtn.addEventListener('click', () => this.start());
+
+      this.start();
+    }
+
+    start() {
+      this.currentIndex = 0;
+      this.score = 0;
+      this.ui.resultsArea.style.display = 'none';
+      this.ui.activeArea.style.display = 'block';
+      this.loadQuestion();
+    }
+
+    loadQuestion() {
+      this.ui.feedbackArea.style.display = 'none';
+      this.ui.activeArea.style.display = 'block';
+      this.ui.answersGrid.style.pointerEvents = 'auto';
+
+      const q = this.questions[this.currentIndex];
+      this.ui.progress.textContent = this.currentIndex + 1;
+      this.ui.questionText.textContent = q.question;
+      
+      // Shuffle answers
+      let answers = [...q.incorrectAnswers.map(a => ({ text: a, correct: false })), { text: q.correctAnswer, correct: true }];
+      answers.sort(() => Math.random() - 0.5);
+
+      this.ui.answersGrid.innerHTML = '';
+      answers.forEach(a => {
+        const btn = document.createElement('button');
+        btn.className = 'answer-btn';
+        btn.textContent = a.text;
+        btn.addEventListener('click', () => this.submitAnswer(a.correct, btn, q));
+        this.ui.answersGrid.appendChild(btn);
+      });
+    }
+
+    submitAnswer(isCorrect, selectedBtn, q) {
+      this.ui.answersGrid.style.pointerEvents = 'none';
+      
+      const allBtns = this.ui.answersGrid.querySelectorAll('.answer-btn');
+      allBtns.forEach(btn => {
+        if (btn.textContent === q.correctAnswer) {
+          btn.classList.add('correct');
+        } else if (btn === selectedBtn) {
+          btn.classList.add('incorrect');
+        } else {
+          btn.classList.add('disabled');
+        }
+      });
+
+      if (isCorrect) {
+        this.score++;
+        this.ui.feedbackArea.className = 'feedback-area is-correct';
+        this.ui.feedbackIcon.textContent = '🎉';
+        this.ui.feedbackTitle.textContent = 'Correct!';
+        this.ui.feedbackCorrection.style.display = 'none';
+      } else {
+        this.ui.feedbackArea.className = 'feedback-area is-incorrect';
+        this.ui.feedbackIcon.textContent = '❌';
+        this.ui.feedbackTitle.textContent = 'Not Quite';
+        this.ui.feedbackCorrection.style.display = 'block';
+        this.ui.correctAnswerText.textContent = q.correctAnswer;
+      }
+
+      this.ui.feedbackExplanation.textContent = q.explanation || '';
+      
+      // Wait a tiny bit then show feedback below the buttons
+      setTimeout(() => {
+        this.ui.feedbackArea.style.display = 'block';
+        this.ui.feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 400);
+    }
+
+    handleNext() {
+      this.currentIndex++;
+      if (this.currentIndex >= this.questions.length) {
+        this.showResults();
+      } else {
+        this.loadQuestion();
+      }
+    }
+
+    showResults() {
+      this.ui.activeArea.style.display = 'none';
+      this.ui.feedbackArea.style.display = 'none';
+      this.ui.resultsArea.style.display = 'block';
+      this.ui.scoreText.textContent = this.score;
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.lesson-quiz').forEach(el => new LessonQuiz(el));
+  });
+</script>
+
+<style>
+  .lesson-quiz {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin: 3rem 0;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .quiz-header {
+    background: var(--color-bg-secondary);
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+  }
+  
+  .quiz-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+  
+  .quiz-progress {
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .quiz-body {
+    padding: 1.5rem;
+  }
+
+  .question-text {
+    font-size: 1.25rem;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Inheriting Devotion Room Answer Button Styles */
+  .answers-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  :global(.answer-btn) {
+    padding: 1rem 1.25rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-align: left;
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--color-text-primary);
+  }
+
+  :global(.answer-btn:hover:not(.disabled)) {
+    border-color: var(--color-accent-primary);
+    background: var(--color-bg-secondary);
+  }
+
+  :global(.answer-btn.correct) {
+    background: #F0FDF4;
+    border-color: #22C55E;
+    color: #166534;
+  }
+
+  :global(.answer-btn.incorrect) {
+    background: #FEF2F2;
+    border-color: #EF4444;
+    color: #991B1B;
+  }
+
+  :global(.answer-btn.disabled) {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  /* Feedback Area */
+  .feedback-area {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    border-radius: var(--radius-sm);
+    border: 2px solid transparent;
+    animation: slideDown 0.3s ease;
+  }
+
+  .feedback-area.is-correct {
+    background: #F0FDF4;
+    border-color: #22C55E;
+  }
+
+  .feedback-area.is-incorrect {
+    background: #FEF2F2;
+    border-color: #EF4444;
+  }
+
+  .feedback-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .feedback-title {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+
+  .feedback-correction {
+    margin-bottom: 0.75rem;
+    color: #991B1B;
+  }
+
+  .feedback-explanation {
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+
+  .results-area {
+    text-align: center;
+    padding: 2rem 0;
+  }
+  
+  .results-area h4 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>

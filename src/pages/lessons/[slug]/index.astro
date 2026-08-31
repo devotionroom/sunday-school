@@ -1,0 +1,387 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import Layout from '../../../layouts/Layout.astro';
+
+export async function getStaticPaths() {
+  const lessons = await getCollection('lessons');
+  return lessons.map(lesson => ({
+    params: { slug: lesson.slug },
+    props: { lesson },
+  }));
+}
+
+const { lesson } = Astro.props;
+
+// Optionally fetch the activity title if there is one linked
+let primaryActivityTitle = "Interactive Activity";
+let craftTitle = "Lesson Craft";
+if (lesson.data.activities && lesson.data.activities.length > 0) {
+  const firstActivity = await getEntry('activities', lesson.data.activities[0]);
+  if (firstActivity) {
+    primaryActivityTitle = firstActivity.data.title;
+  }
+  
+  if (lesson.data.activities.length > 1) {
+    const secondActivity = await getEntry('activities', lesson.data.activities[1]);
+    if (secondActivity) {
+      craftTitle = secondActivity.data.title;
+    }
+  }
+}
+---
+
+<Layout title={lesson.data.title}>
+  <div class="lesson-landing">
+    <!-- Hero Section -->
+    <header class="lesson-hero">
+      <div class="container hero-container">
+        <div class="hero-meta">
+          <span class="meta-item scripture-tag">{lesson.data.bibleReference}</span>
+          {lesson.data.duration && <span class="meta-item duration-tag">⏱️ {lesson.data.duration}</span>}
+        </div>
+        
+        <h1 class="lesson-title">{lesson.data.title}</h1>
+        
+        {lesson.data.bigIdea && (
+          <p class="big-idea">"{lesson.data.bigIdea}"</p>
+        )}
+        
+        <div class="hero-cta">
+          <a href={`/lessons/${lesson.slug}/guide`} class="btn btn-primary btn-large">Start Teaching &rarr;</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="container hub-content">
+      <div class="main-column">
+        {lesson.data.introduction && (
+          <section class="editorial-section">
+            <p class="lead-text">{lesson.data.introduction}</p>
+          </section>
+        )}
+
+        {lesson.data.learningObjectives && lesson.data.learningObjectives.length > 0 && (
+          <section class="editorial-section">
+            <h2>What You'll Teach</h2>
+            <ul class="teaching-points">
+              {lesson.data.learningObjectives.map(obj => (
+                <li>
+                  <span class="check">✓</span> 
+                  <span>{obj}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="sidebar-column">
+        {lesson.data.memoryVerse && (
+          <div class="sidebar-card highlight-card">
+            <h3>Key Verse</h3>
+            <p>{lesson.data.memoryVerse}</p>
+          </div>
+        )}
+
+        <div class="sidebar-card resources-card">
+          <h3>Included Resources</h3>
+          <ul class="resource-list">
+            <li>
+              <a href={`/lessons/${lesson.slug}/guide`} class="resource-link">
+                <div class="icon">📖</div>
+                <div class="details">
+                  <strong>Teacher's Guide</strong>
+                  <span>Complete teaching material, discussion, application, and closing.</span>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href={`/lessons/${lesson.slug}/guide#knowledge-check`} class="resource-link">
+                <div class="icon">🤔</div>
+                <div class="details">
+                  <strong>Knowledge Check</strong>
+                  <span>5 questions based on the lesson.</span>
+                </div>
+              </a>
+            </li>
+            {lesson.data.activities && lesson.data.activities.length > 0 && (
+              <li>
+                <a href={`/lessons/${lesson.slug}/guide#activity-time`} class="resource-link">
+                  <div class="icon">🏃</div>
+                  <div class="details">
+                    <strong>Activity</strong>
+                    <span>{primaryActivityTitle}</span>
+                  </div>
+                </a>
+              </li>
+            )}
+            {lesson.data.activities && lesson.data.activities.length > 1 && (
+              <li>
+                <a href={`/lessons/${lesson.slug}/guide#craft-time`} class="resource-link">
+                  <div class="icon">✂️</div>
+                  <div class="details">
+                    <strong>Craft</strong>
+                    <span>{craftTitle}</span>
+                  </div>
+                </a>
+              </li>
+            )}
+            {lesson.data.memoryVerse && (
+              <li>
+                <a href={`/lessons/${lesson.slug}/guide#memory-verse`} class="resource-link">
+                  <div class="icon">📝</div>
+                  <div class="details">
+                    <strong>Memory Verse</strong>
+                    <span>{lesson.data.memoryVerse}</span>
+                  </div>
+                </a>
+              </li>
+            )}
+            <li>
+              <a href={`/lessons/${lesson.slug}/guide#print`} class="resource-link">
+                <div class="icon">🖨️</div>
+                <div class="details">
+                  <strong>Print Version</strong>
+                  <span>Clean classroom-ready version.</span>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </aside>
+    </main>
+  </div>
+</Layout>
+
+<style>
+  .lesson-landing {
+    background-color: var(--color-bg-primary);
+  }
+
+  /* --- Hero Section --- */
+  .lesson-hero {
+    background: var(--color-bg-secondary);
+    padding: 5rem 0 4rem 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .hero-container {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .hero-meta {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .meta-item {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+  }
+
+  .scripture-tag {
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+  }
+
+  .duration-tag {
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+  }
+
+  .lesson-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    margin: 0 0 1.5rem 0;
+    line-height: 1.1;
+  }
+
+  .big-idea {
+    font-size: 1.5rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+    max-width: 800px;
+    margin: 0 auto 3rem auto;
+    font-style: italic;
+  }
+
+  .btn-large {
+    font-size: 1.25rem;
+    padding: 1rem 3rem;
+    border-radius: 30px;
+    box-shadow: 0 4px 12px rgba(108, 92, 231, 0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+    background: var(--color-accent-primary);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: inline-block;
+    text-decoration: none;
+  }
+  
+  .btn-large:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(108, 92, 231, 0.3);
+    text-decoration: none;
+  }
+
+  /* --- Main Content Area --- */
+  .hub-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    padding: 4rem 1rem;
+    max-width: 1100px;
+  }
+
+  @media (min-width: 800px) {
+    .hub-content {
+      grid-template-columns: 2fr 1fr;
+    }
+  }
+
+  .editorial-section {
+    margin-bottom: 3rem;
+  }
+
+  .editorial-section h2 {
+    font-size: 1.8rem;
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 1.5rem;
+    color: var(--color-text-primary);
+  }
+
+  .lead-text {
+    font-size: 1.2rem;
+    line-height: 1.7;
+    color: var(--color-text-primary);
+  }
+
+  .teaching-points {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .teaching-points li {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    line-height: 1.5;
+  }
+
+  .teaching-points .check {
+    color: var(--color-accent-secondary);
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+
+  /* --- Sidebar --- */
+  .sidebar-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .highlight-card {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-accent-warm);
+    text-align: center;
+  }
+  
+  .highlight-card h3 {
+    margin-top: 0;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text-secondary);
+  }
+  
+  .highlight-card p {
+    font-size: 1.4rem;
+    font-weight: 700;
+    font-family: var(--font-heading);
+    margin: 0;
+  }
+
+  .resources-card h3 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+  }
+
+  .resource-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .resource-link, .resource-item-static {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .resource-list .icon {
+    font-size: 1.5rem;
+    background: var(--color-bg-primary);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+
+  /* Blue = Clickable for resource titles */
+  .resource-link strong {
+    display: block;
+    font-size: 1rem;
+    color: var(--color-accent-primary);
+    margin-bottom: 0.2rem;
+    transition: text-decoration 0.2s;
+  }
+
+  .resource-link:hover strong {
+    text-decoration: underline;
+  }
+
+  /* Normal text = unclickable for static items */
+  .resource-item-static strong {
+    display: block;
+    font-size: 1rem;
+    color: var(--color-text-primary);
+    margin-bottom: 0.2rem;
+  }
+
+  .resource-list .details span {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+  }
+</style>

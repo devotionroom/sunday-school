@@ -1,0 +1,140 @@
+---
+import { getEntry } from 'astro:content';
+
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+const activity = await getEntry('activities', id);
+
+if (!activity) {
+  throw new Error(`Activity with id "${id}" not found.`);
+}
+
+const { Content } = await activity.render();
+---
+
+<div class="embedded-resource">
+  <div class="embedded-header no-print">
+    <span class="resource-label">Activity Resource: <strong>{activity.data.title}</strong></span>
+    <a href={`/activities/${activity.slug}`} class="view-standalone" target="_blank">
+      View Standalone <span>&rarr;</span>
+    </a>
+  </div>
+  
+  {(activity.data.materials || (activity.data.printables && activity.data.printables.length > 0)) && (
+    <div class="embedded-meta no-print">
+      {activity.data.materials && (
+        <div class="meta-section">
+          <h4>Materials:</h4>
+          <ul>
+            {activity.data.materials.map((mat: string) => <li>{mat}</li>)}
+          </ul>
+        </div>
+      )}
+      {activity.data.printables && activity.data.printables.length > 0 && (
+        <div class="meta-section">
+          <h4>Templates:</h4>
+          <div class="downloads">
+            {activity.data.printables.map((file: any) => (
+              <a href={file.fileUrl} download target="_blank" class="download-link">
+                &#128196; {file.title}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )}
+
+  <div class="embedded-content">
+    <Content />
+  </div>
+</div>
+
+<style>
+  .embedded-resource {
+    margin: 2rem 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    overflow: hidden;
+  }
+
+  .embedded-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--color-bg-secondary);
+    padding: 0.75rem 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.9rem;
+  }
+
+  .resource-label {
+    color: var(--color-text-secondary);
+  }
+
+  .view-standalone {
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+  
+  .embedded-meta {
+    padding: 1rem 1.5rem;
+    background: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+  
+  .meta-section h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+  }
+  
+  .meta-section ul {
+    margin: 0;
+    padding-left: 1.25rem;
+    font-size: 0.9rem;
+  }
+  
+  .downloads {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .download-link {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+    border-radius: 4px;
+    font-size: 0.85rem;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .download-link:hover {
+    background: var(--color-primary);
+    color: white;
+  }
+
+  .embedded-content {
+    padding: 0 1.5rem;
+  }
+
+  /* Seamless print integration */
+  @media print {
+    .embedded-resource {
+      border: none;
+      margin: 1rem 0;
+      background: transparent;
+    }
+    .embedded-content {
+      padding: 0;
+    }
+  }
+</style>

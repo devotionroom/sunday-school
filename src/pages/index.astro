@@ -1,0 +1,70 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const lessons = await getCollection('lessons');
+---
+
+<Layout title="Lessons Library">
+  <div class="hero">
+    <div class="container text-center">
+      <h1>Sunday School Lessons</h1>
+      <p>Browse our collection of Bible-based curriculum.</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="lesson-list">
+      {lessons.map(lesson => (
+        <a href={`/lessons/${lesson.slug}`} class="lesson-card interactive-card">
+          <h2>{lesson.data.title}</h2>
+          {lesson.data.bibleReference && <div class="ref">{lesson.data.bibleReference}</div>}
+          {lesson.data.bigIdea && <p>{lesson.data.bigIdea}</p>}
+          <span class="btn btn-primary mt-2">View Lesson</span>
+        </a>
+      ))}
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .hero {
+    background: var(--color-bg-secondary);
+    padding: 2rem 0;
+    margin-bottom: 1.5rem;
+  }
+  .hero h1 { margin-top: 0; }
+  .hero p { font-size: 1.2rem; color: var(--color-text-secondary); }
+  
+  .text-center { text-align: center; }
+  
+  .lesson-list {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 768px) {
+    .lesson-list {
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    }
+  }
+  
+  .lesson-card {
+    display: block;
+    color: inherit;
+  }
+  .lesson-card:hover {
+    text-decoration: none;
+    border-color: var(--color-accent-primary);
+  }
+  .lesson-card h2 {
+    margin-top: 0;
+    font-size: 1.5rem;
+  }
+  .lesson-card .ref {
+    font-weight: 600;
+    color: var(--color-accent-primary);
+    margin-bottom: 0.5rem;
+  }
+  .mt-2 { margin-top: 1rem; }
+</style>

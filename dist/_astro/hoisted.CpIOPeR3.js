@@ -1,0 +1,1 @@
+document.addEventListener("DOMContentLoaded",()=>{const e=document.querySelectorAll(".age-btn"),a=document.getElementById("lesson-content");a&&e.forEach(t=>{t.addEventListener("click",()=>{e.forEach(c=>c.classList.remove("active")),t.classList.add("active");const n=t.getAttribute("data-target-age");n&&a.setAttribute("data-active-age",n)})})});

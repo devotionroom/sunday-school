@@ -1,0 +1,48 @@
+---
+import { getCollection } from 'astro:content';
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+
+export async function getStaticPaths() {
+  const lessons = await getCollection('lessons');
+  return lessons.map(lesson => ({
+    params: { slug: lesson.slug },
+    props: { lesson },
+  }));
+}
+
+const { lesson } = Astro.props;
+const { Content, headings } = await lesson.render();
+---
+
+<!-- Include a back to hub button at the very top of the guide -->
+<div class="no-print hub-back-link">
+  <div class="container">
+    <a href={`/lessons/${lesson.slug}`}>&larr; Back to Lesson Hub</a>
+  </div>
+</div>
+
+<script>
+  if (window.location.hash === '#print') {
+    // Wait a brief moment for the page to finish rendering before printing
+    setTimeout(() => window.print(), 500);
+  }
+</script>
+
+<LessonLayout frontmatter={lesson.data} headings={headings}>
+  <Content />
+</LessonLayout>
+
+<style>
+  .hub-back-link {
+    background: var(--color-bg-secondary);
+    padding: 0.75rem 0;
+    font-weight: 500;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .hub-back-link a {
+    color: var(--color-text-secondary);
+  }
+  .hub-back-link a:hover {
+    color: var(--color-accent-primary);
+  }
+</style>
