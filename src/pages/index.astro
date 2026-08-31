@@ -17,7 +17,7 @@ const base = import.meta.env.BASE_URL;
   <div class="container">
     <div class="lesson-list">
       {lessons.map(lesson => (
-        <a href={`${base}lessons/${lesson.slug}`} class="lesson-card interactive-card">
+        <a href={`${base}lessons/${lesson.slug}/`} class="lesson-card interactive-card">
           <h2>{lesson.data.title}</h2>
           {lesson.data.bibleReference && <div class="ref">{lesson.data.bibleReference}</div>}
           {lesson.data.bigIdea && <p>{lesson.data.bigIdea}</p>}
