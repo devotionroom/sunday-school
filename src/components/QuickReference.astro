@@ -85,6 +85,13 @@ const { title, scripture, bigIdea, points, activity, memoryVerse, takeHome } = A
     grid-template-columns: 1fr;
   }
 
+  /* Prevent grid children from overflowing their track */
+  .qr-main,
+  .qr-points,
+  .qr-actions {
+    min-width: 0;
+  }
+
   @media (min-width: 768px) {
     .qr-grid {
       grid-template-columns: 1fr 1fr;

@@ -12,6 +12,7 @@ const { frontmatter, headings } = Astro.props;
 ---
 
 <Layout title={frontmatter.title}>
+  <slot name="header" />
   <div class="lesson-header no-print">
     <div class="container">
       <h1>{frontmatter.title}</h1>
@@ -73,6 +74,12 @@ const { frontmatter, headings } = Astro.props;
     display: grid;
     grid-template-columns: 1fr;
     gap: 2rem;
+  }
+
+  /* Prevent grid children from overflowing their track (min-width: auto default) */
+  .sidebar,
+  .main-content {
+    min-width: 0;
   }
   
   @media (min-width: 900px) {

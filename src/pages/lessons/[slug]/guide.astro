@@ -15,21 +15,21 @@ const base = import.meta.env.BASE_URL;
 const { Content, headings } = await lesson.render();
 ---
 
-<!-- Include a back to hub button at the very top of the guide -->
-<div class="no-print hub-back-link">
-  <div class="container">
-    <a href={`${base}lessons/${lesson.slug}`}>&larr; Back to Lesson Hub</a>
-  </div>
-</div>
-
-<script>
-  if (window.location.hash === '#print') {
-    // Wait a brief moment for the page to finish rendering before printing
-    setTimeout(() => window.print(), 500);
-  }
-</script>
-
 <LessonLayout frontmatter={lesson.data} headings={headings}>
+  <!-- Include a back to hub button at the very top of the guide -->
+  <div slot="header" class="no-print hub-back-link">
+    <div class="container">
+      <a href={`${base}lessons/${lesson.slug}`}>&larr; Back to Lesson Hub</a>
+    </div>
+  </div>
+
+  <script>
+    if (window.location.hash === '#print') {
+      // Wait a brief moment for the page to finish rendering before printing
+      setTimeout(() => window.print(), 500);
+    }
+  </script>
+
   <Content />
 </LessonLayout>
 

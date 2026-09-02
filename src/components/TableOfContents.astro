@@ -9,31 +9,56 @@ const filteredHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
 ---
 
 <nav class="toc no-print">
-  <h3>Jump to Section</h3>
-  <ul>
-    {filteredHeadings.map((heading) => (
-      <li class={`depth-${heading.depth}`}>
-        <a href={`#${heading.slug}`}>{heading.text}</a>
-      </li>
-    ))}
-  </ul>
+  <!-- Desktop TOC -->
+  <div class="toc-desktop">
+    <h3>Jump to Section</h3>
+    <ul>
+      {filteredHeadings.map((heading) => (
+        <li class={`depth-${heading.depth}`}>
+          <a href={`#${heading.slug}`}>{heading.text}</a>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <!-- Mobile TOC -->
+  <details class="toc-mobile">
+    <summary>Jump to Section <span class="arrow">▾</span></summary>
+    <div class="toc-mobile-content">
+      <ul>
+        {filteredHeadings.map((heading) => (
+          <li class={`depth-${heading.depth}`}>
+            <a href={`#${heading.slug}`} class="mobile-toc-link">{heading.text}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </details>
 </nav>
+
+<script>
+  // Close the mobile accordion when a link is clicked
+  const mobileLinks = document.querySelectorAll('.mobile-toc-link');
+  mobileLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      const details = (e.target as HTMLElement).closest('details');
+      if (details) {
+        details.removeAttribute('open');
+      }
+    });
+  });
+</script>
 
 <style>
   .toc {
     position: sticky;
     top: 2rem;
     background: var(--color-surface);
-    padding: 1.5rem;
     border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
+    z-index: 10;
   }
-  .toc h3 {
-    margin-top: 0;
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
-    color: var(--color-text-secondary);
-  }
+  
   .toc ul {
     list-style: none;
     padding: 0;
@@ -50,8 +75,61 @@ const filteredHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
     color: var(--color-text-primary);
     text-decoration: none;
     transition: color 0.2s ease;
+    display: block; /* Larger click target on mobile */
   }
   .toc a:hover {
     color: var(--color-accent-primary);
+  }
+
+  /* Desktop Styles */
+  .toc-desktop {
+    display: none;
+    padding: 1.5rem;
+  }
+  .toc-desktop h3 {
+    margin-top: 0;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--color-text-secondary);
+  }
+
+  /* Mobile Styles */
+  .toc-mobile {
+    display: block;
+  }
+  .toc-mobile summary {
+    font-weight: 600;
+    cursor: pointer;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--color-text-secondary);
+    list-style: none; /* Hide default arrow */
+  }
+  /* Webkit hide summary arrow */
+  .toc-mobile summary::-webkit-details-marker {
+    display: none;
+  }
+  .toc-mobile[open] summary {
+    border-bottom: 1px solid var(--color-border);
+  }
+  .toc-mobile[open] .arrow {
+    transform: rotate(180deg);
+  }
+  .toc-mobile-content {
+    padding: 1.5rem;
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+
+  /* Switch at 900px to match LessonLayout grid breakpoint */
+  @media (min-width: 900px) {
+    .toc-desktop {
+      display: block;
+    }
+    .toc-mobile {
+      display: none;
+    }
   }
 </style>
