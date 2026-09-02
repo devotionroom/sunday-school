@@ -81,11 +81,27 @@ const { frontmatter, headings } = Astro.props;
   .main-content {
     min-width: 0;
   }
+
+  /* Mobile: make the sidebar accordion bar sticky at the top of the viewport */
+  .sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
   
   @media (min-width: 900px) {
     .lesson-grid {
       grid-template-columns: 250px 1fr;
-      align-items: start;
+      /* align-items: start removed — sidebar must stretch so inner .toc sticky works */
+    }
+    /* Desktop: sidebar stretches to full row height; inner .toc handles its own sticky */
+    .sidebar {
+      position: static;
+      align-self: stretch;
+    }
+    /* Main content stays top-aligned */
+    .main-content {
+      align-self: start;
     }
   }
 
