@@ -25,7 +25,7 @@ const { Content, headings } = await lesson.render();
 
   <!-- Save/Print prompt injected below the Big Idea in the lesson header -->
   <div slot="after-header" class="print-prompt">
-    <a href={`${base}lessons/${lesson.slug}/guide/#print`} class="print-prompt-link">
+    <a href="#" onclick="event.preventDefault(); window.print();" class="print-prompt-link">
       📄 Save as PDF / Print →
     </a>
   </div>
