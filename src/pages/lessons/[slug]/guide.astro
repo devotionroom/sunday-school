@@ -23,6 +23,13 @@ const { Content, headings } = await lesson.render();
     </div>
   </div>
 
+  <!-- Save/Print prompt injected below the Big Idea in the lesson header -->
+  <div slot="after-header" class="print-prompt">
+    <a href={`${base}lessons/${lesson.slug}/guide/#print`} class="print-prompt-link">
+      📄 Save as PDF / Print →
+    </a>
+  </div>
+
   <script>
     if (window.location.hash === '#print') {
       // Wait a brief moment for the page to finish rendering before printing
